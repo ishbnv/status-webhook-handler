@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import type { WebhookRequest, Stage, BotConfig } from './types';
-import { BOTS } from './config/bots';
-import { sendRequest } from './utils/http';
-import { log } from './utils/logger';
+import type { WebhookRequest, Stage, BotConfig } from './types.js';
+import { BOTS } from './config/bots.js';
+import { sendRequest } from './utils/http.js';
+import { log } from './utils/logger.js';
 
 const STAGE_MAP: Record<string, Stage> = {
   '0': 'in_progress',
@@ -98,9 +98,9 @@ async function syncBot(bot: BotConfig, userId: string, stage: Stage, offerName: 
  * 
  * @param {BotConfig} bot - Конфигурация бота
  * @param {string} userId - ID пользователя BotHunter
- * @param {Stage} stage - Текущий этап конверсии
- * @param {string} messageId - ID сообщения/шага в BotHunter
  * @param {string} offerName - Название оффера
+ * @param {string} messageId - ID сообщения/шага в BotHunter
+ * @param {Stage} stage - Текущий этап конверсии
  * @returns {Promise<void>}
  * @throws {Error} Если запрос к API не выполнен
  */
@@ -111,17 +111,6 @@ async function syncTargetHunter(
   messageId: string,
   offerName: string
 ): Promise<void> {
-
-  await sendRequest('https://smm.targethunter.ru/api/bots/addUser', {
-    group_id: bot.tokens.groupId,
-    api_key: process.env.API_KEY,
-    bot_id: bot.tokens.botId,
-    uid: parseInt(userId),
-    channel: bot.channel,
-    step_id: messageId,
-    force: 1,
-  });
-
 
   if (bot.variables.offerName) {
     await sendRequest('https://smm.targethunter.ru/api/vars/set', {
@@ -144,6 +133,16 @@ async function syncTargetHunter(
       value: stage,
     });
   }
+
+  await sendRequest('https://smm.targethunter.ru/api/bots/addUser', {
+    group_id: bot.tokens.groupId,
+    api_key: process.env.API_KEY,
+    bot_id: bot.tokens.botId,
+    uid: parseInt(userId),
+    channel: bot.channel,
+    step_id: messageId,
+    force: 1,
+  });
 }
 
 /**
@@ -155,8 +154,8 @@ async function syncTargetHunter(
  * 
  * @param {BotConfig} bot - Конфигурация бота
  * @param {string} userId - ID пользователя VK
- * @param {string} messageId - ID группы подписчиков в Senler
  * @param {string} offerName - Название оффера
+ * @param {string} messageId - ID группы подписчиков в Senler
  * @returns {Promise<void>}
  * @throws {Error} Если запрос к API не выполнен
  */
@@ -166,14 +165,6 @@ async function syncSenler(
   messageId: string,
   offerName: string
 ) {
-
-  await sendRequest('https://senler.ru/api/subscribers/add', {
-    vk_group_id: bot.tokens.groupId,
-    access_token: process.env.VK_PCHELKAZAIM_BOT_TOKEN,
-    v: 2,
-    vk_user_id: parseInt(userId),
-    subscription_id: messageId,
-  });
 
   if (bot.variables.offerName) {
     await sendRequest('https://senler.ru/api/vars/set', {
@@ -185,4 +176,12 @@ async function syncSenler(
       value: offerName,
     });
   }
+
+  await sendRequest('https://senler.ru/api/subscribers/add', {
+    vk_group_id: bot.tokens.groupId,
+    access_token: process.env.VK_PCHELKAZAIM_BOT_TOKEN,
+    v: 2,
+    vk_user_id: parseInt(userId),
+    subscription_id: messageId,
+  });
 }

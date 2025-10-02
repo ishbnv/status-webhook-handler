@@ -1,11 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { handleWebhook } from './webhook.handler';
+import { handleWebhook } from './webhook.handler.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3011;
 
 // Middleware
 app.use(express.json());
